@@ -34,10 +34,10 @@ API="${ANDROID_API:-26}"
 # Both ABIs by default. CI's per-ABI matrix narrows this to one with
 # AETHER_ABIS, so the two ABIs compile on two runners at once instead of one
 # after the other. Anything but the two shipped ABIs is refused up front.
-read -r -a ABIS <<< "${AETHER_ABIS:-arm64-v8a armeabi-v7a}"
+read -r -a ABIS <<< "${AETHER_ABIS:-arm64-v8a}"
 for _abi in "${ABIS[@]}"; do
   case "${_abi}" in
-    arm64-v8a|armeabi-v7a) ;;
+    arm64-v8a) ;;
     *) echo "ERROR: unsupported ABI '${_abi}' in AETHER_ABIS (use arm64-v8a and/or armeabi-v7a)." >&2; exit 2 ;;
   esac
 done

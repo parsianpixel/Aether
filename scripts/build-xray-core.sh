@@ -70,10 +70,10 @@ NATIVE_DIR="${PROJECT_DIR}/.native"
 JNI_DIR="${PROJECT_DIR}/app/src/main/jniLibs"
 
 API="${ANDROID_API:-26}"
-read -r -a ABIS <<< "${AETHER_ABIS:-arm64-v8a armeabi-v7a}"
+read -r -a ABIS <<< "${AETHER_ABIS:-arm64-v8a}"
 for _abi in "${ABIS[@]}"; do
   case "${_abi}" in
-    arm64-v8a|armeabi-v7a) ;;
+    arm64-v8a) ;;
     *) echo "ERROR: unsupported ABI '${_abi}' in AETHER_ABIS (use arm64-v8a and/or armeabi-v7a)." >&2; exit 2 ;;
   esac
 done

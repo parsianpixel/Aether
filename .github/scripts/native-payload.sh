@@ -17,7 +17,7 @@ JNI="${1:-app/src/main/jniLibs}"
 SUMMARY="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
 IS_RELEASE_TAG="${IS_RELEASE_TAG:-false}"
 
-ABIS=(arm64-v8a armeabi-v7a)
+read -r -a ABIS <<< "${AETHER_ABIS:-arm64-v8a}"
 MANDATORY=(libaether.so libhev-socks5-tunnel.so libaethertun.so)
 CHAIN=(libpsiphon.so libtor.so)
 TRANSPORTS=(liblyrebird.so libsnowflake.so libwebtunnel.so)
@@ -56,8 +56,14 @@ row() {
 {
   echo "### 🧩 Native payload"
   echo
-  echo "| Group | Library | arm64-v8a | armeabi-v7a |"
-  echo "|---|---|---:|---:|"
+  header="| Group | Library |"
+  separator="|---|---|"
+  for abi in "${ABIS[@]}"; do
+    header+=" ${abi} |"
+    separator+="---:|"
+  done
+  echo "${header}"
+  echo "${separator}"
 } >> "${SUMMARY}"
 for lib in "${MANDATORY[@]}";  do row "🔒 Core"    "${lib}" mandatory; done
 for lib in "${CHAIN[@]}";      do row "⛓️ Chain"   "${lib}" optional;  done

@@ -33,8 +33,8 @@ plugins {
 // CI does not grep these any more: it reads AGP's own output-metadata.json
 // next to the built APKs, so a comment that happens to mention versionName can
 // no longer rename every published artifact.
-val appVersionName = "1.5.3"
-val appBaseVersionCode = 18
+val appVersionName = "1.5.4"
+val appBaseVersionCode = 20
 
 // Each split APK needs its own code, and the universal one must outrank both,
 // otherwise a device that can take the arm64 split could still be offered the
@@ -42,13 +42,11 @@ val appBaseVersionCode = 18
 // which must not read the android DSL back (AGP 9 no longer guarantees that is
 // safe) - hence plain script values instead.
 val abiVersionCodeOffsets = mapOf(
-    "armeabi-v7a" to 1,
     "arm64-v8a" to 2,
-    "universal" to 3,
 )
 
 /** The ABIs this app ships. Single source of truth for the payload checks. */
-val shippedAbis = listOf("arm64-v8a", "armeabi-v7a")
+val shippedAbis = listOf("arm64-v8a")
 
 // ================================================================= SIGNING ==
 //
@@ -487,8 +485,8 @@ android {
         abi {
             isEnable = true
             reset()
-            include("arm64-v8a", "armeabi-v7a")
-            isUniversalApk = true
+            include("arm64-v8a")
+            isUniversalApk = false
         }
     }
 

@@ -85,7 +85,8 @@ env:
   JAVA_VERSION: "17"            # AGP 9.4 requires JDK 17
   NDK_VERSION: "29.0.14206865"
   ANDROID_API: "26"             # must match minSdk in app/build.gradle.kts
-  RUST_TARGETS: "aarch64-linux-android,armv7-linux-androideabi"
+  AETHER_ABIS: "arm64-v8a"
+  RUST_TARGETS: "aarch64-linux-android"
   # Psiphon core (cgo through the NDK). THIS VALUE IS LOAD-BEARING:
   # psiphon-tunnel-core's staging-client go.mod carries `go 1.26.0` and
   # `toolchain go1.26.5`, and actions/setup-go exports GOTOOLCHAIN=local whenever
@@ -147,7 +148,7 @@ jobs:
             app/src/main/jniLibs
             app/src/main/assets/tor
           key: >-
-            jnilibs-v5-${{ runner.os }}-ndk${{ env.NDK_VERSION }}-api${{ env.ANDROID_API }}-go${{
+            jnilibs-v6-${{ env.AETHER_ABIS }}-${{ runner.os }}-ndk${{ env.NDK_VERSION }}-api${{ env.ANDROID_API }}-go${{
             env.GO_VERSION }}-xgo${{ env.XRAY_GO_VERSION }}-${{
             hashFiles('scripts/build-natives.sh', 'scripts/fetch-natives.sh',
             'scripts/build-overlay-cores.sh', 'scripts/build-xray-core.sh',
@@ -169,7 +170,7 @@ jobs:
           psiphon=true
           tor=true
           xray=true
-          for abi in arm64-v8a armeabi-v7a; do
+          for abi in ${AETHER_ABIS}; do
             for lib in libaether.so libhev-socks5-tunnel.so libaethertun.so; do
               [ -f "app/src/main/jniLibs/${abi}/${lib}" ] || mandatory=false
             done
@@ -364,7 +365,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           for lib in libpsiphon.so libtor.so libxray.so; do
             present=true
-            for abi in arm64-v8a armeabi-v7a; do
+            for abi in ${AETHER_ABIS}; do
               [ -f "app/src/main/jniLibs/${abi}/${lib}" ] || present=false
             done
             if [ "${present}" = true ]; then
@@ -543,7 +544,7 @@ jobs:
         run: |
           set -euo pipefail
           chain_missing=false
-          for abi in arm64-v8a armeabi-v7a; do
+          for abi in ${AETHER_ABIS}; do
             for lib in libaether.so libhev-socks5-tunnel.so libaethertun.so; do
               if [ ! -f "app/src/main/jniLibs/${abi}/${lib}" ]; then
                 echo "::error::missing native library ${abi}/${lib}"
@@ -567,7 +568,7 @@ jobs:
             echo "::error::a tagged release must include libpsiphon.so, libtor.so and libxray.so for every ABI"
             exit 1
           fi
-          echo "Native payload complete for arm64-v8a and armeabi-v7a."
+          echo "Native payload complete for ${AETHER_ABIS}."
 
       # This repo ships no gradle-wrapper.jar, so Gradle comes from the action.
       # AGP accepts only a narrow window of Gradle versions (9.4 needs 9.6.0 or

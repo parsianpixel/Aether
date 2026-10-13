@@ -239,6 +239,12 @@ class ProfileStore(private val context: Context) {
             ?: d.torBridgeTransport
         val storedBridgeLines = prefs[Keys.torBridgeLines]
 
+        // MIGRATION (ECH): ECH is mandatory for this test build. Older builds
+        // persisted false, so ignore the stored value and always expose ECH as
+        // enabled after an update. The save path below also rewrites the value
+        // to true whenever the profile is persisted.
+        val ech = true
+
         // SEEDING, exactly once. A default of "built-in bridges" with an empty
         // list is a page that says bridges are on and shows nothing selected, so
         // the bundled catalogue is copied in - the same lines the user would have
@@ -296,7 +302,7 @@ class ProfileStore(private val context: Context) {
             manualRange = prefs[Keys.range] ?: "",
             keepalive = prefs[Keys.keepalive] ?: 0,
             fragment = prefs[Keys.fragment] ?: false,
-            ech = prefs[Keys.ech] ?: true,
+            ech = ech,
             mtu = prefs[Keys.mtu] ?: d.mtu,
             proxyMode = prefs[Keys.proxy] ?: false,
             splitMode = prefs[Keys.split]
@@ -389,7 +395,7 @@ class ProfileStore(private val context: Context) {
             prefs[Keys.range] = profile.manualRange
             prefs[Keys.keepalive] = profile.keepalive
             prefs[Keys.fragment] = profile.fragment
-            prefs[Keys.ech] = profile.ech
+            prefs[Keys.ech] = true
             prefs[Keys.mtu] = profile.mtu
             prefs[Keys.proxy] = profile.proxyMode
             prefs[Keys.split] = profile.splitMode.name
