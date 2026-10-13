@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.map
 import studio.cluvex.aether.core.BridgePlan
 import studio.cluvex.aether.model.BridgeTransport
@@ -202,7 +203,17 @@ class ProfileStore(private val context: Context) {
      */
     private val secrets = SecretStore(context)
 
-    val profile: Flow<ConnectionProfile> = context.dataStore.data.map { prefs ->
+    val profile: Flow<ConnectionProfile> = context.dataStore.data
+        // Persist the ECH default for upgraded installs too. Reading `false`
+        // as `true` fixes the active profile in memory, but without this write
+        // the old value remains on disk until some unrelated setting changes.
+        // DataStore emits once more after this edit, then the guard is stable.
+        .onEach { prefs ->
+            if (prefs[Keys.ech] != true) {
+                context.dataStore.edit { it[Keys.ech] = true }
+            }
+        }
+        .map { prefs ->
         val d = ConnectionProfile()
         // MIGRATION (obfuscation): an OFF stored by an older build is NOT a
         // choice to run bare. Back then OFF meant "emit no --noize", and the
@@ -239,10 +250,9 @@ class ProfileStore(private val context: Context) {
             ?: d.torBridgeTransport
         val storedBridgeLines = prefs[Keys.torBridgeLines]
 
-        // MIGRATION (ECH): ECH is mandatory for this test build. Older builds
-        // persisted false, so ignore the stored value and always expose ECH as
-        // enabled after an update. The save path below also rewrites the value
-        // to true whenever the profile is persisted.
+        // ECH migration: legacy false is intentionally ignored in this build.
+        // The onEach above also rewrites the stored value, so this is a real
+        // migration rather than only an in-memory override.
         val ech = true
 
         // SEEDING, exactly once. A default of "built-in bridges" with an empty

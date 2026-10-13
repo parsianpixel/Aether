@@ -394,8 +394,6 @@ android {
         // pluggable transports are cross-compiled per ABI too, and an APK that
         // carries libtor.so for an ABI without liblyrebird.so is an APK whose
         // Tor hop drops every obfuscated bridge on that ABI alone.
-        ndk { abiFilters += shippedAbis }
-
         // Same value, same precedence as before (env first, then the Gradle
         // property, then empty), but read through the provider API.
         //
